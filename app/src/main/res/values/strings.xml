@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Asynch Task Example</string>
+    <string name="password_placeholder">Password Placeholder</string>
+</resources>
