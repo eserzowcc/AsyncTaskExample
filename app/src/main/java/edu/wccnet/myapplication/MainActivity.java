@@ -9,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,11 +26,15 @@ import java.net.URL;
 
 
 public class MainActivity extends AppCompatActivity {
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        progressBar.setMax(5);
 
         final TextView myResult=findViewById(R.id.editTextResult);
 
@@ -39,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Toast myToast = Toast.makeText( MainActivity.this,"Retrieving your password...", Toast.LENGTH_SHORT );
                 myToast.show();
+                progressBar.setVisibility(View.VISIBLE);
 
                 RetrievePasswordTask myTask = new RetrievePasswordTask(myResult);
                 myTask.execute("http://echo.jsontest.com/user/eserzo/password/notmypassword");
@@ -57,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Simple example first..
     // On break now try to morph this to retrieve the weather!
-    private class RetrievePasswordTask extends AsyncTask<String, Void, String> {
+    private class RetrievePasswordTask extends AsyncTask<String, Integer, String> {
         private TextView textView;
 
         public RetrievePasswordTask(TextView textView) {
@@ -84,14 +90,27 @@ public class MainActivity extends AppCompatActivity {
                 password = topLevel.getString("password");
 
                 urlConnection.disconnect();
-            } catch (IOException | JSONException e) {
+
+                // Putting a fake sleep in here
+                for( int counter=0; counter<5;counter++ ) {
+                    // Sleep for one second
+                    Thread.sleep(1000);
+                    publishProgress(counter);
+                }
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             return password;
         }
 
         @Override
+        protected void onProgressUpdate(Integer... values) {
+            progressBar.setProgress(values[0]);
+        }
+
+        @Override
         protected void onPostExecute(String result) {
+            progressBar.setVisibility(View.INVISIBLE);
             textView.setText(result);
         }
 
